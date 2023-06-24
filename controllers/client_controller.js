@@ -96,7 +96,7 @@ const createClient = async (clientName) => {
 
     const client = new Client({
         puppeteer: {
-            headless: false,
+            headless: true,
             executablePath: process.env.CHROMIUM_PATH,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         },
