@@ -4,17 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run-json": "json-server --port 3001 db.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.4.0",
     "circular-json": "^0.5.9",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "express-validator": "^7.0.1",
+    "json-server": "^0.17.3",
     "mysql": "^2.18.1",
     "qrcode": "^1.5.3",
     "whatsapp-web.js": "^1.21.0"
