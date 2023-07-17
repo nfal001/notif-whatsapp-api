@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run-json": "json-server --port 3001 db.json"
+    "run-json": "json-server --host 103.186.31.155 --port 3001 db.json"
   },
   "keywords": [],
   "author": "",

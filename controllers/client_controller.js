@@ -162,7 +162,7 @@ const createClient = async (clientName) => {
                 const messageFrom = message.from;
                 const clientNumber = clientName;
 
-                await axios.post("http://127.0.0.1:3001/topup", {
+                await axios.post("http://103.186.31.155:3001/topup", {
                     client: clientNumber,
                     number: messageFrom,
                     message: messageBody
@@ -185,6 +185,11 @@ const createClient = async (clientName) => {
 }
 
 const newClient = async (req, res) => {
+	const errors = validationResult(req)
+
+	if (!errors.isEmpty()) {
+        return res.status(400).json({ status: false, errors: errors.array() });
+    } else {
 
     const clientName = req.body.clientname
     const auth = req.query.auth
@@ -193,7 +198,7 @@ const newClient = async (req, res) => {
         const clients = await clientLength()
         const ready = await select(clientName)
 
-        if (clients[0].length <= 3 && ready.length === 0) {
+        if (clients[0].length <= 66  && ready.length === 0) {
             createClient(clientName)
             res.status(200).json({
                 status: true,
@@ -216,6 +221,7 @@ const newClient = async (req, res) => {
             message: `unauthorized`
         })
     }
+	}
 }
 
 const getQRCode = async (req, res) => {
@@ -289,7 +295,7 @@ const sendMessage = async (req, res) => {
         return res.status(400).json({ status: false, errors: errors.array() });
     } else {
         const auth = req.query.auth;
-        if (auth == secret_key) {
+        if (auth === secret_key) {
             const clientname = req.body.clientname;
             let sendto = req.body.sendto;
             const message = req.body.message;
@@ -303,7 +309,13 @@ const sendMessage = async (req, res) => {
                     status: false,
                     message: `client with name ${clientname} not found!`
                 })
-            } else {
+            } else if(clientFound[0].status !== "ready") {
+		res.status(400).json({
+                    status: false,
+                    message: `please login first! get qr code and generate in website.`
+                })
+		}
+		else {
                 const client = await clients.find(c => c.name == clientname).clientdata
 
                 client.sendMessage(phoneNumber, message).then(response => {
@@ -356,7 +368,12 @@ const sendMedia = async (req, res) => {
                     status: false,
                     message: `client with name ${clientname} not found!`
                 })
-            } else {
+            } else if(clientFound[0].status !== "ready") {
+                res.status(400).json({
+                    status: false,
+                    message: `please login first! get qr code and generate in website.`
+                })
+	    } else {
                 const client = await clients.find(c => c.name == clientname).clientdata
 
                 client.sendMessage(phoneNumber, media, { caption: caption }).then(response => {
@@ -413,7 +430,12 @@ const sendButton = async (req, res) => {
                     status: false,
                     message: `client with name ${clientname} not found!`
                 })
-            } else {
+            } else if(clientFound[0].status !== "ready") {
+                res.status(400).json({
+                    status: false,
+                    message: `please login first! get qr code and generate in website.`
+                })
+	    } else {
                 const client = await clients.find(c => c.name == clientname).clientdata
 
                 client.sendMessage(phoneNumber, newButton).then(response => {
@@ -454,8 +476,12 @@ const setStatus = async (req, res) => {
             const clientname = req.body.clientname;
             let newstatus = req.body.newstatus;
 
-            const client = await clients.find(c => c.name == clientname).clientdata
+            const clientData = await clients.find(c => c.name == clientname)
 
+	if (!clientData){
+		res.status(400).json({status: false, message:`client with name ${clientname} not found!`})
+	} else {
+		const client = clientData.clientdata
             await client.setStatus(newstatus).then(response => {
                 res.status(200).json({
                     status: true,
@@ -468,7 +494,7 @@ const setStatus = async (req, res) => {
                     err: err
                 })
             });
-
+	}
         } else {
             res.status(401).json({
                 status: false,
@@ -500,6 +526,11 @@ const getPhotoProfile = async (req, res) => {
                 res.status(400).json({
                     status: false,
                     message: `client with name ${clientname} not found!`
+                })
+            } else if(clientFound[0].status !== "ready") {
+                res.status(400).json({
+                    status: false,
+                    message: `please login first! get qr code and generate in website.`
                 })
             } else {
                 const client = await clients.find(c => c.name == clientname).clientdata
@@ -543,7 +574,13 @@ const changeFowardSetting = async (req, res) => {
                         status: false,
                         message: `client with name ${clientname} not found!`
                     })
-                } else {
+                } else if(clientFound[0].status !== "ready") {
+                res.status(400).json({
+                    status: false,
+                    message: `please login first! get qr code and generate in website.`
+                })
+                } 
+		else {
                     const foward = {
                         foward: 1
                     }
@@ -562,7 +599,13 @@ const changeFowardSetting = async (req, res) => {
                         status: false,
                         message: `client with name ${clientname} not found!`
                     })
-                } else {
+                } else if(clientFound[0].status !== "ready") {
+                res.status(400).json({
+                    status: false,
+                    message: `please login first! get qr code and generate in website.`
+                })
+                }
+		 else {
                     const foward = {
                         foward: 0
                     }
