@@ -4,7 +4,7 @@ const clientController = require('../controllers/client_controller')
 const { body } = require('express-validator');
 const path = require('path');
 
-router.post('/', [body('client_name').notEmpty().withMessage("field client_name is required.").isSlug().withMessage("client_name not valid. please input clientname without space.").isString().withMessage("client_name not valid. please input clientname using string")], clientController.newClient);
+router.post('/', [body('client_name').notEmpty().withMessage("field client_name is required.").isString().withMessage("client_name not valid. please input clientname using string")], clientController.newClient);
 
 router.get('/qr', [body('client_name').notEmpty().withMessage("field client_name is required.")], clientController.getQRCode);
 
@@ -21,10 +21,5 @@ router.post('/setstatus', [body('client_name').notEmpty().withMessage("field cli
 router.get('/photoprofile', [body('client_name').notEmpty().withMessage("field client_name is required."), body('phone_number').notEmpty().withMessage("field phone_number is required.").isString().withMessage("type data of phone_number is string")], clientController.getPhotoProfile);
 
 router.post('/fowardsetting', [body('client_name').notEmpty().withMessage("field client_name is required."), body('setting').notEmpty().withMessage("field setting is required.").isBoolean().withMessage("Data type of field setting is boolean")], clientController.changeFowardSetting);
-
-
-router.get('/generateqr', function(req, res) {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
-});
 
 module.exports = router

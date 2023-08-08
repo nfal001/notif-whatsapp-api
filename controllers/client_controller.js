@@ -214,36 +214,45 @@ const newClient = (req, res) => {
         const clientName = req.body.client_name
         const auth = req.query.auth
 
-        if (auth === secret_key) {
-            select(clientName, (err, result) => {
-                if(err){
-                    console.error(err);
-                } else {
-                    if(result.length === 0){
-                        res.status(200).json({
-                            status: true,
-                            message: `Client ${clientName} successfully created`
-                        });
-                        createClient(clientName, (err, result) => {
-                            if (err){
-                                console.error(err);
-                            } else {
-                                console.log(result);
-                            }
-                        });
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `Client with name ${clientName} is already, please insert another name!`
-                        });
-                    }
-                }
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
+
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
             });
         } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            })
+            if (auth === secret_key) {
+                select(clientName, (err, result) => {
+                    if(err){
+                        console.error(err);
+                    } else {
+                        if(result.length === 0){
+                            res.status(200).json({
+                                status: true,
+                                message: `Client ${clientName} successfully created`
+                            });
+                            createClient(clientName, (err, result) => {
+                                if (err){
+                                    console.error(err);
+                                } else {
+                                    console.log(result);
+                                }
+                            });
+                        } else {
+                            res.status(400).json({
+                                status: false,
+                                message: `Client with name ${clientName} is already, please insert another name!`
+                            });
+                        }
+                    }
+                });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
+            }
         }
 	}
 }
@@ -262,29 +271,38 @@ const getQRCode = (req, res) => {
         const clientName = req.body.client_name
         const auth = req.query.auth
 
-        if (auth == secret_key) {
-            select(clientName, (err, result) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    if (result.length === 1){
-                        res.status(200).json({
-                            status: true,
-                            qr_code: result[0].qrcode
-                        });
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `client with name ${clientName} not found!`
-                        });
-                    }
-                }
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
+
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
             });
         } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            });
+            if (auth == secret_key) {
+                select(clientName, (err, result) => {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        if (result.length === 1){
+                            res.status(200).json({
+                                status: true,
+                                qr_code: result[0].qrcode
+                            });
+                        } else {
+                            res.status(400).json({
+                                status: false,
+                                message: `client with name ${clientName} not found!`
+                            });
+                        }
+                    }
+                });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                });
+            }
         }
     }
 }
@@ -299,34 +317,43 @@ const getStatus = (req, res) => {
             errors: errors.array()
         });
     } else {
-
+   
         const auth = req.query.auth
         const clientName = req.body.client_name
 
-        if (auth == secret_key) {
-            
-            select(clientName, (err, result) => {
-                if (err){
-                    console.error(err);
-                } else {
-                    if(result.length === 1){
-                        res.status(200).json({
-                            status: true,
-                            client_status: result[0].status
-                        });
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `client with name ${clientName} not found!`
-                        });
-                    }
-                }
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
+
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
             });
         } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            })
+            if (auth == secret_key) {
+            
+                select(clientName, (err, result) => {
+                    if (err){
+                        console.error(err);
+                    } else {
+                        if(result.length === 1){
+                            res.status(200).json({
+                                status: true,
+                                client_status: result[0].status
+                            });
+                        } else {
+                            res.status(400).json({
+                                status: false,
+                                message: `client with name ${clientName} not found!`
+                            });
+                        }
+                    }
+                });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
+            }
         }
     }
 }
@@ -350,49 +377,58 @@ const sendMessage = (req, res) => {
         var phoneFormat = '@c.us';
         const phoneNumber = sendTo.concat(phoneFormat);
 
-        if (auth === secret_key) {
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
+
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
+            });
+        } else {
+            if (auth === secret_key) {
             
-            select(clientName, (err, result) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    if (result.length === 1){
-                        if (result[0].status === "ready") {
-
-                            const client = clients.find(c => c.name == clientName).clientData;
-
-                            client.sendMessage(phoneNumber, message).then(response => {
-                                res.status(200).json({
-                                    status: true,
-                                    message: `success send message to ${sendTo}.`,
-                                    response: response
-                                })
-                            }).catch(err => {
-                                res.status(500).json({
-                                    status: false,
-                                    message: `can't send message.`,
-                                    error: err
+                select(clientName, (err, result) => {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        if (result.length === 1){
+                            if (result[0].status === "ready") {
+    
+                                const client = clients.find(c => c.name == clientName).clientData;
+    
+                                client.sendMessage(phoneNumber, message).then(response => {
+                                    res.status(200).json({
+                                        status: true,
+                                        message: `success send message to ${sendTo}.`,
+                                        response: response
+                                    })
+                                }).catch(err => {
+                                    res.status(500).json({
+                                        status: false,
+                                        message: `can't send message.`,
+                                        error: err
+                                    });
                                 });
-                            });
+                            } else {
+                                res.status(400).json({
+                                    status: false,
+                                    message: `client status not ready!`
+                                });
+                            }
                         } else {
                             res.status(400).json({
                                 status: false,
-                                message: `client status not ready!`
+                                message: `client with name ${clientName} not found!`
                             });
                         }
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `client with name ${clientName} not found!`
-                        });
                     }
-                }
-            });
-        } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            })
+                });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
+            }
         }
     }
 
@@ -418,52 +454,61 @@ const sendMedia = (req, res) => {
         var phoneFormat = '@c.us';
         const phoneNumber = sendTo.concat(phoneFormat);
 
-        if (auth == secret_key) {
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
 
-            const media = new MessageMedia(file.mimetype, file.data.toString('base64'), file.name);
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
+            });
+        } else {
+            if (auth == secret_key) {
 
-            select(clientName, (err, result) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    if(result.length === 1){
-                        if (result[0].status === "ready") {
-
-                            const client = clients.find(c => c.name == clientName).clientData;
-
-                            client.sendMessage(phoneNumber, media, { caption: caption }).then(response => {
-                                res.status(200).json({
-                                    status: true,
-                                    message: `success send media to ${sendTo}.`,
-                                    response: response
+                const media = new MessageMedia(file.mimetype, file.data.toString('base64'), file.name);
+    
+                select(clientName, (err, result) => {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        if(result.length === 1){
+                            if (result[0].status === "ready") {
+    
+                                const client = clients.find(c => c.name == clientName).clientData;
+    
+                                client.sendMessage(phoneNumber, media, { caption: caption }).then(response => {
+                                    res.status(200).json({
+                                        status: true,
+                                        message: `success send media to ${sendTo}.`,
+                                        response: response
+                                    });
+                                }).catch(err => {
+                                    res.status(500).json({
+                                        status: false,
+                                        message: `can't send media.`,
+                                        error: err
+                                    });
                                 });
-                            }).catch(err => {
-                                res.status(500).json({
+                            } else {
+                                res.status(400).json({
                                     status: false,
-                                    message: `can't send media.`,
-                                    error: err
+                                    message: `client status not ready!`
                                 });
-                            });
+                            }
+                            
                         } else {
                             res.status(400).json({
                                 status: false,
-                                message: `client status not ready!`
+                                message: `client with name ${clientName} not found!`
                             });
                         }
-                        
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `client with name ${clientName} not found!`
-                        });
                     }
-                }
-            });
-        } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            })
+                });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
+            }
         }
     }
 }
@@ -481,63 +526,72 @@ const sendButton = (req, res) => {
 
         const auth = req.query.auth;
 
-        if (auth == secret_key) {
+        const clientName = req.body.client_name;
+        let sendTo = req.body.send_to;
+        const body = req.body.body;
+        const bt1 = req.body.button_1;
+        const bt2 = req.body.button_2;
+        const bt3 = req.body.button_3;
+        const title = req.body.title;
+        const footer = req.body.footer;
 
-            const clientName = req.body.client_name;
-            let sendTo = req.body.send_to;
-            const body = req.body.body;
-            const bt1 = req.body.button_1;
-            const bt2 = req.body.button_2;
-            const bt3 = req.body.button_3;
-            const title = req.body.title;
-            const footer = req.body.footer;
+        const newButton = new Buttons(body, [{ body: bt1 }, { body: bt2 }, { body: bt3 }], title, footer);
 
-            const newButton = new Buttons(body, [{ body: bt1 }, { body: bt2 }, { body: bt3 }], title, footer);
+        var phoneFormat = '@c.us';
+        const phoneNumber = sendTo.concat(phoneFormat);
 
-            var phoneFormat = '@c.us';
-            const phoneNumber = sendTo.concat(phoneFormat);
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
 
-            select(clientName, (err, result) => {
-                if (err){
-                    console.error(err);
-                } else {
-                    if (result.length === 1){
-                        if(result[0].status === "ready"){
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
+            });
+        } else {
+            if (auth == secret_key) {
 
-                            const client = clients.find(c => c.name == clientName).clientData;
-
-                            client.sendMessage(phoneNumber, newButton).then(response => {
-                                res.status(200).json({
-                                    status: true,
-                                    message: `success send button to ${sendTo}.`,
-                                    response: response
-                                });
-                            }).catch(err => {
-                                res.status(500).json({
+                select(clientName, (err, result) => {
+                    if (err){
+                        console.error(err);
+                    } else {
+                        if (result.length === 1){
+                            if(result[0].status === "ready"){
+    
+                                const client = clients.find(c => c.name == clientName).clientData;
+    
+                                client.sendMessage(phoneNumber, newButton).then(response => {
+                                    res.status(200).json({
+                                        status: true,
+                                        message: `success send button to ${sendTo}.`,
+                                        response: response
+                                    });
+                                }).catch(err => {
+                                    res.status(500).json({
+                                        status: false,
+                                        message: `can't send media.`,
+                                        error: err
+                                    });
+                                })
+                            } else {
+                                res.status(400).json({
                                     status: false,
-                                    message: `can't send media.`,
-                                    error: err
+                                    message: `client status not ready!`
                                 });
-                            })
+                            }
                         } else {
                             res.status(400).json({
                                 status: false,
-                                message: `client status not ready!`
+                                message: `client with name ${clientName} not found!`
                             });
                         }
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `client with name ${clientName} not found!`
-                        });
                     }
-                }
-            });
-        } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            })
+                });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
+            }
         }
     }
 }
@@ -554,157 +608,40 @@ const setStatus = (req, res) => {
     } else {
 
         const auth = req.query.auth;
+        const clientName = req.body.client_name;
+        const newStatus = req.body.new_status;
 
-        if (auth == secret_key) {
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
 
-            const clientName = req.body.client_name;
-            const newStatus = req.body.new_status;
-
-            select(clientName, (err, result) => {
-                if (err){
-                    console.error(err);
-                } else {
-                    if (result.length === 1){
-                        if (result[0].status === "ready"){
-
-                            const client =  clients.find(c => c.name == clientName).clientData;
-
-                            client.setStatus(newStatus).then(response => {
-                                res.status(200).json({
-                                    status: true,
-                                    message: `Status ${clientName} updated`,
-                                    response: response
-                                });
-                            }).catch(err => {
-                                res.status(500).json({
-                                    status: false,
-                                    message: "can't update status",
-                                    err: err
-                                })
-                            });
-                        } else {
-                            res.status(400).json({
-                                status: false,
-                                message: `client status not ready!`
-                            });
-                        }
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `client with name ${clientName} not found!`
-                        });
-                    }
-                }
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
             });
         } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            })
-        }
-    }
-}
+            if (auth == secret_key) {
 
-const getPhotoProfile = (req, res) => {
-
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            status: false,
-            errors: errors.array()
-        });
-    } else {
-
-        const auth = req.query.auth;
-
-        if (auth == secret_key) {
-
-            const clientName = req.body.client_name;
-            let phone = req.body.phone_number;
-
-            var phoneFormat = '@c.us'
-            const phoneNumber = phone.concat(phoneFormat);
-
-            select(clientName, async (err, result) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    if (result.length === 1){
-                        if (result[0].status === "ready"){
-
-                            const client = clients.find(c => c.name == clientName).clientData;
-                            const profileUrl = await client.getProfilePicUrl(phoneNumber);
-
-                            res.status(200).json({
-                                status: true,
-                                message: "success get photo profile",
-                                profil_url: profileUrl
-                            });
-                        } else {
-                            res.status(400).json({
-                                status: false,
-                                message: `client status not ready!`
-                            });
-                        }
-                    } else {
-                        res.status(400).json({
-                            status: false,
-                            message: `client with name ${clientName} not found!`
-                        });
-                    }
-                }
-            });
-        } else {
-            res.status(401).json({
-                status: false,
-                message: `unauthorized`
-            })
-        }
-    }
-}
-
-const changeFowardSetting = (req, res) => {
-
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            status: false,
-            errors: errors.array()
-        });
-    } else {
-
-        const auth = req.query.auth;
-
-        if (auth == secret_key) {
-
-            const clientName = req.body.client_name;
-            const fowardSetting = req.body.setting;
-
-            if (fowardSetting) {
-                select(clientName, async (err, result) => {
+                select(clientName, (err, result) => {
                     if (err){
                         console.error(err);
                     } else {
                         if (result.length === 1){
                             if (result[0].status === "ready"){
-
-                                const foward = {
-                                    foward: 1
-                                }
-
-                                await update(foward, clientName, (err, result) => {
-                                    if (err){
-                                        console.error(err);
-                                    } else {
-                                        console.log(result);
-                                    }
-                                });
-
-                                res.status(200).json({
-                                    status: true,
-                                    message: 'foward setting changed to true successfully.'
+    
+                                const client =  clients.find(c => c.name == clientName).clientData;
+    
+                                client.setStatus(newStatus).then(response => {
+                                    res.status(200).json({
+                                        status: true,
+                                        message: `Status ${clientName} updated`,
+                                        response: response
+                                    });
+                                }).catch(err => {
+                                    res.status(500).json({
+                                        status: false,
+                                        message: "can't update status",
+                                        err: err
+                                    })
                                 });
                             } else {
                                 res.status(400).json({
@@ -721,28 +658,57 @@ const changeFowardSetting = (req, res) => {
                     }
                 });
             } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
+            }
+        }
+    }
+}
+
+const getPhotoProfile = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            status: false,
+            errors: errors.array()
+        });
+    } else {
+
+        const auth = req.query.auth;
+        const clientName = req.body.client_name;
+        let phone = req.body.phone_number;
+
+        var phoneFormat = '@c.us'
+        const phoneNumber = phone.concat(phoneFormat);
+
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
+
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
+                status: false,
+                err: "No special characters, please!",
+            });
+        } else {
+            if (auth == secret_key) {
+
                 select(clientName, async (err, result) => {
-                    if (err){
+                    if (err) {
                         console.error(err);
                     } else {
                         if (result.length === 1){
                             if (result[0].status === "ready"){
-
-                                const foward = {
-                                    foward: 0
-                                }
-
-                                await update(foward, clientName, (err, result) => {
-                                    if (err){
-                                        console.error(err);
-                                    } else {
-                                        console.log(result);
-                                    }
-                                });
-
+    
+                                const client = clients.find(c => c.name == clientName).clientData;
+                                const profileUrl = await client.getProfilePicUrl(phoneNumber);
+    
                                 res.status(200).json({
                                     status: true,
-                                    message: 'foward setting changed to true successfully.'
+                                    message: "success get photo profile",
+                                    profil_url: profileUrl
                                 });
                             } else {
                                 res.status(400).json({
@@ -758,12 +724,124 @@ const changeFowardSetting = (req, res) => {
                         }
                     }
                 });
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
             }
-        } else {
-            res.status(401).json({
+
+        }
+    }
+}
+
+const changeFowardSetting = (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            status: false,
+            errors: errors.array()
+        });
+    } else {
+
+        const auth = req.query.auth;
+        const clientName = req.body.client_name;
+        const fowardSetting = req.body.setting;
+
+        const onlyLettersPattern = /^[A-Za-z0-9]+$/;
+
+        if(!clientName.match(onlyLettersPattern)){
+            return res.status(400).json({
                 status: false,
-                message: `unauthorized`
-            })
+                err: "No special characters, please!",
+            });
+        } else {
+            if (auth == secret_key) {
+                if (fowardSetting) {
+                    select(clientName, async (err, result) => {
+                        if (err){
+                            console.error(err);
+                        } else {
+                            if (result.length === 1){
+                                if (result[0].status === "ready"){
+    
+                                    const foward = {
+                                        foward: 1
+                                    }
+    
+                                    await update(foward, clientName, (err, result) => {
+                                        if (err){
+                                            console.error(err);
+                                        } else {
+                                            console.log(result);
+                                        }
+                                    });
+    
+                                    res.status(200).json({
+                                        status: true,
+                                        message: 'foward setting changed to true successfully.'
+                                    });
+                                } else {
+                                    res.status(400).json({
+                                        status: false,
+                                        message: `client status not ready!`
+                                    });
+                                }
+                            } else {
+                                res.status(400).json({
+                                    status: false,
+                                    message: `client with name ${clientName} not found!`
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    select(clientName, async (err, result) => {
+                        if (err){
+                            console.error(err);
+                        } else {
+                            if (result.length === 1){
+                                if (result[0].status === "ready"){
+    
+                                    const foward = {
+                                        foward: 0
+                                    }
+    
+                                    await update(foward, clientName, (err, result) => {
+                                        if (err){
+                                            console.error(err);
+                                        } else {
+                                            console.log(result);
+                                        }
+                                    });
+    
+                                    res.status(200).json({
+                                        status: true,
+                                        message: 'foward setting changed to true successfully.'
+                                    });
+                                } else {
+                                    res.status(400).json({
+                                        status: false,
+                                        message: `client status not ready!`
+                                    });
+                                }
+                            } else {
+                                res.status(400).json({
+                                    status: false,
+                                    message: `client with name ${clientName} not found!`
+                                });
+                            }
+                        }
+                    });
+                }
+            } else {
+                res.status(401).json({
+                    status: false,
+                    message: `unauthorized`
+                })
+            }
         }
     }
 }
